@@ -1,0 +1,33 @@
+# Virtual Environments
+.myenv/
+venv/
+env/
+__pycache__/
+*.pyc
+
+# Environment Secrets
+.env
+.env.*
+!.env.example
+
+# Vector Store / Indexes / Pickles
+*.faiss
+*.pkl
+index.faiss
+index.pkl
+vector_store/
+chroma_db/
+
+# Uploaded raw files & temp
+uploads/
+temp/
+*.pdf
+*.xlsx
+*.csv
+
+# Logs & OS/Editor files
+*.log
+logs/
+.vscode/
+.idea/
+.DS_Store
