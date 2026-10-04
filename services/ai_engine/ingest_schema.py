@@ -10,6 +10,35 @@ from core.config import settings
 
 PERSIST_DIRECTORY = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "chroma_db"))
 
+# Enriched semantic metadata descriptions for core master tables to optimize vector retrieval
+ENRICHED_TABLE_METADATA = {
+    "users": {
+        "purpose": (
+            "Primary master table for employees, operators, trainers, admins, and staff members. "
+            "Contains employee names, full names, assigned departments, roles, employee IDs, and staff directory records. "
+            "Logical relationship note: department may be used as the application-level lookup to departments.id where stored values follow that identifier; "
+            "sectionId may be used as the application-level lookup to sections.id where stored values follow that identifier; "
+            "lineId may be used as the application-level lookup to lines.id where stored values follow that identifier; "
+            "subSectionId may be used as the application-level lookup to sub_sections.id where stored values follow that identifier."
+        ),
+        "synonyms": (
+            "user, users, employee, employees, emp, staff, worker, workers, operator, operators, person, name, designation, status, joiningDate, "
+            "employee master, operator master, workforce roster, employee status, employee designation, temporary workforce, employee names, full names, "
+            "assigned departments, roles, employee IDs, staff directory records"
+        ),
+    },
+    "departments": {
+        "purpose": (
+            "Master lookup catalog containing department codes and official department titles, defining organizational departments and division units. "
+            "Logical relationship note: course may be used as the application-level lookup to courses.id where stored values follow that identifier; "
+            "instructor may be used as the application-level lookup to users.id where stored values follow that identifier."
+        ),
+        "synonyms": (
+            "department, departments, dept, depts, department master, organizational unit, plant department, master lookup catalog, department codes, official department titles"
+        ),
+    },
+}
+
 def parse_catalog_to_documents(catalog_text: str) -> list[Document]:
     """
     Parses physical schema catalog and combines it with 100% English semantic metadata
@@ -32,7 +61,10 @@ def parse_catalog_to_documents(catalog_text: str) -> list[Document]:
     all_tables = sorted(set(TABLE_METADATA.keys()) | set(TABLE_NAMES) | set(ddl_by_table.keys()))
 
     for table_name in all_tables:
-        meta = TABLE_METADATA.get(table_name, {})
+        meta = dict(TABLE_METADATA.get(table_name, {}))
+        if table_name in ENRICHED_TABLE_METADATA:
+            meta.update(ENRICHED_TABLE_METADATA[table_name])
+
         purpose = meta.get("purpose", f"Physical database table storing operational records for {table_name}.")
         synonyms = meta.get("synonyms", table_name.replace("_", " "))
         key_cols = meta.get("key_columns", "")
